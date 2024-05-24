@@ -7,10 +7,8 @@ const App = () => {
     <ScrollView>
       <SafeAreaView>
         <View style={{margin: 20}}>
-          <Text>
-          React-Native-Sensor
-          </Text>
-     
+          <Text>React-Native-Sensor</Text>
+
           <Sensors />
         </View>
       </SafeAreaView>

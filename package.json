@@ -12,6 +12,7 @@
   "dependencies": {
     "react": "18.2.0",
     "react-native": "0.74.1",
+    "react-native-network-info": "^5.2.1",
     "react-native-sensors": "^7.3.6",
     "rxjs": "^7.8.1"
   },
