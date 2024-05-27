@@ -6,15 +6,15 @@ import {
   setUpdateIntervalForType,
   SensorTypes,
 } from 'react-native-sensors';
-// import {map} from 'rxjs/operators';
+import {bufferCount, filter, map, pairwise, tap} from 'rxjs/operators';
 
 const Sensors = () => {
-
-  const [accelero, setAccelero] = useState({x: 0, y: 0, z: 0});
+  const threshold = 20;
   const [gyro, setGyro] = useState({x: 0, y: 0, z: 0});
-
+  const [directionIndex, setDirectionIndex] = useState('Neutral');
+  // const [directionLogs, setDirectionLogs] = useState([]);
   useEffect(() => {
-    const updateInterval = 400;
+    const updateInterval = 50;
     setUpdateIntervalForType(SensorTypes.accelerometer, updateInterval);
     setUpdateIntervalForType(SensorTypes.gyroscope, updateInterval);
 
@@ -23,16 +23,37 @@ const Sensors = () => {
     });
 
     const subscriptionAccelero = accelerometer
-      .subscribe(({x, y, z}) => {
-        setAccelero({x, y, z});
+      .pipe(
+        map(({x}) => x),
+        pairwise(),
+
+        map(x =>
+          x.reduce(
+            (accumulator, currentValue) => accumulator + currentValue,
+            0,
+          ),
+        ),
+
+        filter(x => Math.abs(x) > threshold),
+      )
+
+      .subscribe({
+        next: x => {
+          setDirectionIndex(x > 0 ? 'Left' : 'Right');
+          // setDirectionLogs(prev => [...prev, directionIndex]);
+          setTimeout(() => {
+            // console.log(directionIndex);
+            setDirectionIndex('Neutral');
+          }, 1200);
+        },
+        error: err => console.log(err),
       });
 
     return () => {
       subscriptionGyro.unsubscribe();
       subscriptionAccelero.unsubscribe();
     };
-  }, []);
-
+  }, [directionIndex]);
   return (
     <View>
       <Text>Gyroscope Sensor</Text>
@@ -40,12 +61,11 @@ const Sensors = () => {
       <Text>Y: {Math.round(gyro.y)}</Text>
       <Text>Z: {Math.round(gyro.z)}</Text>
 
-      <Text>Accelerometer Sensor</Text>
-      <Text>X: {Math.round(accelero.x)}</Text>
-      <Text>Y: {Math.round(accelero.y)}</Text>
-      <Text>Z: {Math.round(accelero.z)}</Text>
-
-
+      <Text>Direction Index</Text>
+      <Text> Direction : {directionIndex}</Text>
+      {/* {directionLogs.map((log, index) => (
+        <Text key={index}>{log}</Text>
+      ))} */}
     </View>
   );
 };
