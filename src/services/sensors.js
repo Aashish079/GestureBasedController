@@ -16,6 +16,11 @@ export const subscribeGyroscope = setGyro => {
     setGyro({x, y, z});
   });
 };
+export const subscribeRawAcclerometer = setRawAccelero => {
+  return accelerometer.subscribe(({x, y, z}) => {
+    setRawAccelero({x, y, z});
+  });
+};
 
 export const subscribeAccelerometer = setDirectionIndex => {
   return accelerometer

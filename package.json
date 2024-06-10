@@ -1,7 +1,6 @@
 {
   "name": "GestureBasedController",
   "version": "0.0.1",
-  "type": "module",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
@@ -14,6 +13,7 @@
     "react": "18.2.0",
     "react-native": "0.74.1",
     "react-native-sensors": "^7.3.6",
+    "react-native-udp": "^4.1.7",
     "rxjs": "^7.8.1",
     "ws": "^8.17.0"
   },
