@@ -1,20 +1,40 @@
-import {View, Text, SafeAreaView, ScrollView} from 'react-native';
+import {View, Text, SafeAreaView, ScrollView, StyleSheet} from 'react-native';
 import React from 'react';
 import Sensors from './src/components/sensors';
 import Lobby from './src/components/lobby';
 
 const App = () => {
   return (
-    <ScrollView>
-      <SafeAreaView>
-        <View style={{margin: 20}}>
-          <Text>React-Native-Sensor</Text>
-<Lobby/>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.scrollView}>
+        <View style={styles.container}>
+          <Text style={styles.title}>Gesture Based Controller</Text>
+          <Lobby />
           {/* <Sensors /> */}
         </View>
-      </SafeAreaView>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  scrollView: {
+    flexGrow: 1,
+  },
+  container: {
+    flex: 1,
+    margin: 20,
+  },
+  title: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+});
 
 export default App;
