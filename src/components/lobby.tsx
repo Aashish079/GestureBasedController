@@ -1,7 +1,15 @@
 import React, {useState} from 'react';
-import {View, Text, StyleSheet, TextInput, Button} from 'react-native';
-import {listenForBroadcast, connectToServer} from '../scripts/listen_broadcast';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Button,
+} from 'react-native';
+import {listenForBroadcast, useWebSocket} from '../scripts/listen_broadcast';
 const Lobby = () => {
+  const {connectToServer} = useWebSocket();
   const [username, setUsername] = useState('');
   const [availableConnection, setAvailableConnection] = useState<string[]>([]);
   const handleClick = async () => {
@@ -11,6 +19,14 @@ const Lobby = () => {
       setAvailableConnection(Array.from(hostInfo));
     } catch (error) {
       console.error('Failed to listen for broadcast:', error);
+    }
+  };
+
+  const makeConnection = async (ip, port, username) => {
+    try {
+      await connectToServer(ip, port, username);
+    } catch (error) {
+      console.log('Error ', error);
     }
   };
   return (
@@ -36,17 +52,19 @@ const Lobby = () => {
           const [host, address] = hostInfo.split('@');
           const [ip, port] = address.split(':');
           return (
-            //Pachhi yo buttonbanaune 
-            <View key={index}>
-              <Text>Host: {host}</Text>
-              <Text>Ip: {ip}</Text>
+            <TouchableOpacity
+              key={port}
+              onPress={() => makeConnection(ip, port, username)}>
+              <View key={index}>
+                <Text>Host: {host}</Text>
+                <Text>Ip: {ip}</Text>
 
-              <Text>Port: {port}</Text>
-            </View>
+                <Text>Port: {port}</Text>
+              </View>
+            </TouchableOpacity>
           );
         }
       })}
- 
     </View>
   );
 };

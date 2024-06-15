@@ -35,6 +35,7 @@ export const subscribeAccelerometer = setDirectionIndex => {
     .subscribe({
       next: x => {
         setDirectionIndex(x > 0 ? 'Left' : 'Right');
+
         setTimeout(() => {
           setDirectionIndex('Neutral');
         }, 1200);

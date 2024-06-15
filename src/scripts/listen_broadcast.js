@@ -1,25 +1,11 @@
 import dgram from 'react-native-udp';
-import {WebSocket} from 'ws';
-import {NativeModules} from 'react-native';
-const {WifiManager} = NativeModules;
-
-function enableMulticastLock() {
-  if (WifiManager && WifiManager.acquireMulticastLock) {
-    WifiManager.acquireMulticastLock();
-  }
-}
-function releaseMulticastLock() {
-  if (WifiManager && WifiManager.releaseMulticastLock) {
-    WifiManager.releaseMulticastLock();
-  }
-}
+import {createContext, useState, useContext} from 'react';
 
 const BROADCAST_PORT = 9732;
-// const USERNAME = 'Gesture';
+
 const addressPortSet = new Set();
 
-enableMulticastLock();
-function listenForBroadcast(timeout = 5000) {
+export function listenForBroadcast(timeout = 5000) {
   return new Promise((resolve, reject) => {
     const udpSocket = dgram.createSocket({
       type: 'udp4',
@@ -50,42 +36,55 @@ function listenForBroadcast(timeout = 5000) {
 
     udpSocket.on('error', err => {
       console.log(`UDP socket error: ${err.message}`);
-      releaseMulticastLock();
+
       udpSocket.close();
       reject(err);
     });
 
     setTimeout(() => {
-      releaseMulticastLock();
       udpSocket.close();
       resolve(addressPortSet);
     }, timeout);
   });
 }
 
-async function connectToServer(host, port, username) {
-  const uri = `ws://${host}:${port}`;
-  console.log(`Connecting to WebSocket server at ${uri}`);
+const WebSocketContext = createContext(null);
 
-  const websocket = new WebSocket(uri);
+export const WebSocketProvider = ({children}) => {
+  const [ws, setWs] = useState(null);
 
-  websocket.on('open', () => {
-    console.log('Connected to server');
-    websocket.send(`username=${username}`);
-  });
+  const connectToServer = async (host, port, username) => {
+    const uri = `ws://${host}:${port}`;
+    console.log(`Connecting to WebSocket server at ${uri}`);
 
-  websocket.on('message', message => {
-    console.log(`Received message: ${message}`);
-  });
+    const websocket = new WebSocket(uri);
+    setWs(websocket);
 
-  websocket.on('close', () => {
-    console.log('Disconnected from server');
-  });
+    websocket.onopen = () => {
+      console.log('Connected to server');
+      websocket.send(`username=${username}`);
+    };
 
-  websocket.on('error', error => {
-    console.error(`WebSocket error: ${error}`);
-  });
-}
+    websocket.onmessage = message => {
+      console.log(`Received message: ${message.data}`);
+    };
 
-// listenForBroadcast();
-export {listenForBroadcast, connectToServer};
+    websocket.onclose = () => {
+      console.log('Disconnected from server');
+      setWs(null);
+    };
+
+    websocket.onerror = error => {
+      console.error(`WebSocket error: ${error}`);
+    };
+  };
+
+  return (
+    <WebSocketContext.Provider value={{ws, connectToServer}}>
+      {children}
+    </WebSocketContext.Provider>
+  );
+};
+
+
+export const useWebSocket = () => useContext(WebSocketContext);

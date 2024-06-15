@@ -1,5 +1,6 @@
 import {View, Text, SafeAreaView, ScrollView} from 'react-native';
 import React from 'react';
+import {WebSocketProvider} from './src/scripts/listen_broadcast';
 import Sensors from './src/components/sensors';
 import Lobby from './src/components/lobby';
 
@@ -9,8 +10,11 @@ const App = () => {
       <SafeAreaView>
         <View style={{margin: 20}}>
           <Text>React-Native-Sensor</Text>
-<Lobby/>
-          {/* <Sensors /> */}
+
+          <WebSocketProvider>
+            <Lobby />
+            <Sensors />
+          </WebSocketProvider>
         </View>
       </SafeAreaView>
     </ScrollView>
