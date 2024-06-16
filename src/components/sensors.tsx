@@ -5,17 +5,27 @@ import {
   subscribeGyroscope,
   subscribeRawAcclerometer,
 } from '../services/sensors';
+import {useWebSocket} from '../scripts/listen_broadcast';
 const Sensors = () => {
+  const {ws} = useWebSocket();
   const [gyro, setGyro] = useState({x: 0, y: 0, z: 0});
   const [acclero, setAcclero] = useState({x: 0, y: 0, z: 0});
   const [directionIndex, setDirectionIndex] = useState('Neutral');
-  // const [directionLogs, setDirectionLogs] = useState([]);
+
   useEffect(() => {
     const subscriptionGyro = subscribeGyroscope(setGyro);
+
     const subscriptionRawAcclero = subscribeRawAcclerometer(setAcclero);
 
     const subscriptionAccelero = subscribeAccelerometer(setDirectionIndex);
-
+    if (ws) {
+      const data = {
+        // gyroscope: gyro,
+        // accelerometer: acclero,
+        directionIndex: directionIndex,
+      };
+      ws.send(JSON.stringify(data));
+    }
     return () => {
       subscriptionGyro.unsubscribe();
       subscriptionRawAcclero.unsubscribe();

@@ -5,15 +5,15 @@ import {
   StyleSheet,
   TextInput,
   Button,
-  FlatList,
   TouchableOpacity,
   Image,
 } from 'react-native';
-import {listenForBroadcast} from '../scripts/listen_broadcast';
+import {listenForBroadcast, useWebSocket} from '../scripts/listen_broadcast';
 
 const Lobby = () => {
+  const {connectionToServer} = useWebSocket();
   const [username, setUsername] = useState('');
-  const [availableConnection, setAvailableConnection] = useState([]);
+  const [availableConnection, setAvailableConnection] = useState<string[]>([]);
 
   const handleClick = async () => {
     try {
@@ -24,17 +24,12 @@ const Lobby = () => {
     }
   };
 
-  const renderConnection = ({item}) => {
-    const [host, address] = item.split('@');
-    const [ip, port] = address.split(':');
-
-    return (
-      <TouchableOpacity style={styles.deviceContainer}>
-        <Text style={styles.deviceName}>Host: {host}</Text>
-        <Text style={styles.deviceAddress}>IP: {ip}</Text>
-        <Text style={styles.deviceAddress}>Port: {port}</Text>
-      </TouchableOpacity>
-    );
+  const makeConnection = async (ip, port, username) => {
+    try {
+      await connectionToServer(ip, port, username);
+    } catch (error) {
+      console.error('Failed to connect to server:', error);
+    }
   };
 
   return (
@@ -55,16 +50,27 @@ const Lobby = () => {
           handleClick();
         }}
       />
-      <FlatList
-        data={availableConnection}
-        renderItem={renderConnection}
-        keyExtractor={(item, index) => index.toString()}
-        ListFooterComponent={
-          <Text style={styles.footer}>
-            Please trun on the host device and click enter
-          </Text>
-        }
-      />
+      {availableConnection.length > 0 &&
+        availableConnection.map((hostInfo, index) => {
+          if (availableConnection.length > 0) {
+            const [host, address] = hostInfo.split('@');
+            const [ip, port] = address.split(':');
+            console.log(ip, port, username);
+
+            return (
+              <TouchableOpacity
+                key={port}
+                onPress={() => makeConnection(ip, port, username)}>
+                <View key={index}>
+                  <Text>Host: {host}</Text>
+                  <Text>Ip: {ip}</Text>
+
+                  <Text>Port: {port}</Text>
+                </View>
+              </TouchableOpacity>
+            );
+          }
+        })}
     </View>
   );
 };

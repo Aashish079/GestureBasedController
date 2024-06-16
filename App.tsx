@@ -2,6 +2,8 @@ import {View, Text, SafeAreaView, ScrollView, StyleSheet} from 'react-native';
 import React from 'react';
 import Sensors from './src/components/sensors';
 import Lobby from './src/components/lobby';
+import StackNavigator from './StackNavigator';
+import {WebSocketProvider} from './src/scripts/listen_broadcast';
 
 const App = () => {
   return (
@@ -9,8 +11,10 @@ const App = () => {
       <ScrollView contentContainerStyle={styles.scrollView}>
         <View style={styles.container}>
           <Text style={styles.title}>Gesture Based Controller</Text>
-          <Lobby />
-          {/* <Sensors /> */}
+          <WebSocketProvider>
+            <Lobby />
+            <Sensors />
+          </WebSocketProvider>
         </View>
       </ScrollView>
     </SafeAreaView>
