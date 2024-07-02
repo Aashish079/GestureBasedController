@@ -3,8 +3,7 @@ import React from 'react';
 import {WebSocketProvider} from './src/scripts/listen_broadcast';
 import Sensors from './src/components/sensors';
 import Lobby from './src/components/lobby';
-import StackNavigator from './StackNavigator';
-import {WebSocketProvider} from './src/scripts/listen_broadcast';
+// import StackNavigator from './StackNavigator';
 
 const App = () => {
   return (
