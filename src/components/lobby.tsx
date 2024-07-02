@@ -4,18 +4,21 @@ import {
   Text,
   StyleSheet,
   TextInput,
+
   TouchableOpacity,
   Button,
+    Image,
 } from 'react-native';
 import {listenForBroadcast, useWebSocket} from '../scripts/listen_broadcast';
 const Lobby = () => {
   const {connectToServer} = useWebSocket();
+
   const [username, setUsername] = useState('');
   const [availableConnection, setAvailableConnection] = useState<string[]>([]);
+
   const handleClick = async () => {
     try {
       const hostInfo = await listenForBroadcast();
-
       setAvailableConnection(Array.from(hostInfo));
     } catch (error) {
       console.error('Failed to listen for broadcast:', error);
@@ -24,20 +27,23 @@ const Lobby = () => {
 
   const makeConnection = async (ip, port, username) => {
     try {
+
       await connectToServer(ip, port, username);
     } catch (error) {
       console.log('Error ', error);
     }
   };
+
   return (
-    <View>
-      <Text>Lobby</Text>
-      <Text>Input a username</Text>
+    <View style={styles.container}>
+      <Image source={require('../../assets/hero.png')} style={styles.image} />
+      <Text style={styles.title}>Select your device</Text>
       <TextInput
         style={styles.input}
         onChangeText={text => setUsername(text)}
         value={username}
         placeholder="Enter username"
+        placeholderTextColor="#888"
       />
       <Button
         title="Enter"
@@ -46,8 +52,7 @@ const Lobby = () => {
           handleClick();
         }}
       />
-
-      {availableConnection.map((hostInfo, index) => {
+       {availableConnection.map((hostInfo, index) => {
         if (availableConnection.length > 0) {
           const [host, address] = hostInfo.split('@');
           const [ip, port] = address.split(':');
@@ -64,16 +69,54 @@ const Lobby = () => {
             </TouchableOpacity>
           );
         }
-      })}
     </View>
   );
 };
+
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#000',
+    padding: 20,
+  },
+  image: {
+    width: '100%',
+    height: 200,
+    resizeMode: 'contain',
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 20,
+  },
   input: {
     height: 40,
-    margin: 12,
+    borderColor: '#888',
     borderWidth: 1,
-    padding: 10,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    marginBottom: 20,
+    color: '#fff',
+  },
+  deviceContainer: {
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#444',
+  },
+  deviceName: {
+    color: '#fff',
+    fontSize: 18,
+  },
+  deviceAddress: {
+    color: '#888',
+    fontSize: 14,
+  },
+  footer: {
+    color: '#888',
+    textAlign: 'center',
+    marginTop: 20,
   },
 });
 
