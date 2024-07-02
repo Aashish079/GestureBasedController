@@ -4,14 +4,15 @@ import {
   Text,
   StyleSheet,
   TextInput,
-  Button,
+
   TouchableOpacity,
-  Image,
+  Button,
+    Image,
 } from 'react-native';
 import {listenForBroadcast, useWebSocket} from '../scripts/listen_broadcast';
-
 const Lobby = () => {
-  const {connectionToServer} = useWebSocket();
+  const {connectToServer} = useWebSocket();
+
   const [username, setUsername] = useState('');
   const [availableConnection, setAvailableConnection] = useState<string[]>([]);
 
@@ -26,9 +27,10 @@ const Lobby = () => {
 
   const makeConnection = async (ip, port, username) => {
     try {
-      await connectionToServer(ip, port, username);
+
+      await connectToServer(ip, port, username);
     } catch (error) {
-      console.error('Failed to connect to server:', error);
+      console.log('Error ', error);
     }
   };
 
@@ -50,27 +52,23 @@ const Lobby = () => {
           handleClick();
         }}
       />
-      {availableConnection.length > 0 &&
-        availableConnection.map((hostInfo, index) => {
-          if (availableConnection.length > 0) {
-            const [host, address] = hostInfo.split('@');
-            const [ip, port] = address.split(':');
-            console.log(ip, port, username);
+       {availableConnection.map((hostInfo, index) => {
+        if (availableConnection.length > 0) {
+          const [host, address] = hostInfo.split('@');
+          const [ip, port] = address.split(':');
+          return (
+            <TouchableOpacity
+              key={port}
+              onPress={() => makeConnection(ip, port, username)}>
+              <View key={index}>
+                <Text>Host: {host}</Text>
+                <Text>Ip: {ip}</Text>
 
-            return (
-              <TouchableOpacity
-                key={port}
-                onPress={() => makeConnection(ip, port, username)}>
-                <View key={index}>
-                  <Text>Host: {host}</Text>
-                  <Text>Ip: {ip}</Text>
-
-                  <Text>Port: {port}</Text>
-                </View>
-              </TouchableOpacity>
-            );
-          }
-        })}
+                <Text>Port: {port}</Text>
+              </View>
+            </TouchableOpacity>
+          );
+        }
     </View>
   );
 };
