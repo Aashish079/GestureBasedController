@@ -1,26 +1,36 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TextInput,
+  Alert,
   TouchableOpacity,
   Button,
   Image,
 } from 'react-native';
 import {listenForBroadcast, useWebSocket} from '../scripts/listen_broadcast';
 
-const Lobby = () => {
-  const {connectToServer} = useWebSocket();
+const Lobby = ({navigation}) => {
+  const {connectToServer, isConnected} = useWebSocket();
   const [username, setUsername] = useState('');
+
   const [availableConnection, setAvailableConnection] = useState<string[]>([]);
+  useEffect(() => {
+    if (isConnected) {
+      navigation.navigate('Sensors');
+    }
+  }, [isConnected, navigation]);
   const handleClick = async () => {
     try {
-      const hostInfo = await listenForBroadcast();
-
-      setAvailableConnection(Array.from(hostInfo));
+      if (username === '') {
+        Alert.alert('Input field is empty', 'Username can’t be empty');
+      } else {
+        const hostInfo = await listenForBroadcast();
+        setAvailableConnection(Array.from(hostInfo));
+      }
     } catch (error) {
-      console.error('Failed to listen for broadcast:', error);
+      console.error('Error occurred:', error);
     }
   };
 
@@ -56,9 +66,10 @@ const Lobby = () => {
           const [ip, port] = address.split(':');
           return (
             <TouchableOpacity
+              style={styles.deviceContainer}
               key={port}
               onPress={() => makeConnection(ip, port, username)}>
-              <View key={index}>
+              <View style={styles.deviceName} key={index}>
                 <Text>Host: {host}</Text>
                 <Text>Ip: {ip}</Text>
 
@@ -102,9 +113,11 @@ const styles = StyleSheet.create({
   deviceContainer: {
     padding: 20,
     borderBottomWidth: 1,
+
     borderBottomColor: '#444',
   },
   deviceName: {
+    margin: 15,
     color: '#fff',
     fontSize: 18,
   },
