@@ -102,12 +102,18 @@ wss.on('connection', (ws, req) => {
   ws.on('message', message => {
     console.log(`Received message: ${message}`);
 
-    if (message === 'left') {
+    //Obtained message is string so converting into JSON
+    const messageObj = JSON.parse(message);
+    console.log(messageObj.directionIndex);
+
+    if (messageObj.directionIndex === 'Left') {
       robot.keyTap('left');
       console.log('Left arrow key pressed');
-    } else if (message === 'right') {
+    } else if (messageObj.directionIndex === 'Right') {
       robot.keyTap('right');
       console.log('Right arrow key pressed');
+    } else if (messageObj.directionIndex === 'Neutral') {
+      console.log('Neutral position, no key pressed');
     }
   });
 

@@ -62,7 +62,7 @@ export const WebSocketProvider = ({children}) => {
 
     websocket.onopen = () => {
       console.log('Connected to server');
-      websocket.send(`username=${username}`);
+      websocket.send(`{"username":"${username}"}`);
     };
 
     websocket.onmessage = message => {

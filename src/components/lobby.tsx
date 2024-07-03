@@ -4,13 +4,11 @@ import {
   Text,
   StyleSheet,
   TextInput,
-
   TouchableOpacity,
   Button,
-    Image,
+  Image,
 } from 'react-native';
 import {listenForBroadcast, useWebSocket} from '../scripts/listen_broadcast';
-
 
 const Lobby = () => {
   const {connectToServer} = useWebSocket();
@@ -35,15 +33,15 @@ const Lobby = () => {
   };
   return (
     <View style={styles.container}>
-    <Image source={require('../../assets/hero.png')} style={styles.image} />
-    <Text style={styles.title}>Select your device</Text>
-    <TextInput
-      style={styles.input}
-      onChangeText={text => setUsername(text)}
-      value={username}
-      placeholder="Enter username"
-      placeholderTextColor="#888"
-    />
+      <Image source={require('../../assets/hero.png')} style={styles.image} />
+      <Text style={styles.title}>Select your device</Text>
+      <TextInput
+        style={styles.input}
+        onChangeText={text => setUsername(text)}
+        value={username}
+        placeholder="Enter username"
+        placeholderTextColor="#888"
+      />
       <Button
         title="Enter"
         onPress={() => {
@@ -119,7 +117,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 20,
   },
-  
 });
 
 export default Lobby;
