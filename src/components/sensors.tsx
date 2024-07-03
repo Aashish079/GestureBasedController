@@ -1,15 +1,23 @@
-import React, {useState, useEffect} from 'react';
-import {View, Text, Button, BackHandler, StyleSheet,TouchableOpacity} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+
+  BackHandler,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
 import {
   subscribeAccelerometer,
   subscribeGyroscope,
   subscribeRawAcclerometer,
 } from '../services/sensors';
-import {useWebSocket} from '../scripts/listen_broadcast';
-const Sensors = ({navigation}) => {
-  const {socket, isConnected, setIsConnected} = useWebSocket();
-  const [gyro, setGyro] = useState({x: 0, y: 0, z: 0});
-  const [acclero, setAcclero] = useState({x: 0, y: 0, z: 0});
+import { useWebSocket } from '../scripts/listen_broadcast';
+const Sensors = ({ navigation }) => {
+  const { socket, isConnected, setIsConnected } = useWebSocket();
+
+  const [gyro, setGyro] = useState({ x: 0, y: 0, z: 0 });
+  const [acclero, setAcclero] = useState({ x: 0, y: 0, z: 0 });
   const [dataToSend, setDataToSend] = useState('directionIndex');
   const [directionIndex, setDirectionIndex] = useState('Neutral');
 
@@ -47,7 +55,7 @@ const Sensors = ({navigation}) => {
   useEffect(() => {
     if (!isConnected || dataToSend !== 'directionIndex') return;
     if (socket) {
-      const data = {directionIndex: directionIndex};
+      const data = { directionIndex: directionIndex };
       socket.send(JSON.stringify(data));
     }
   }, [socket, isConnected, directionIndex, dataToSend]);
@@ -55,7 +63,7 @@ const Sensors = ({navigation}) => {
   useEffect(() => {
     if (!isConnected || dataToSend !== 'gyroAcclero') return;
     if (socket) {
-      const data = {gyroscope: gyro, accelerometer: acclero};
+      const data = { gyroscope: gyro, accelerometer: acclero };
       socket.send(JSON.stringify(data));
     }
   }, [socket, isConnected, gyro, acclero, dataToSend]);
@@ -72,14 +80,27 @@ const Sensors = ({navigation}) => {
 
       <Text>Direction Index</Text>
       <Text>Direction : {directionIndex}</Text>
-      <Button  style={styles.button}
-        title="Gyro and Acclero"
-        onPress={() => setDataToSend('gyroAcclero')}
-      />
-      <Button  style={styles.button}
-        title="Direction Index"
-        onPress={() => setDataToSend('directionIndex')}
-      />
+
+      <TouchableOpacity
+        style={[
+          styles.deviceContainer,
+          dataToSend === 'gyroAcclero' && styles.activeDeviceContainer,
+        ]}
+        onPress={() => setDataToSend('gyroAcclero')}>
+        <View>
+          <Text>Gyro and Acclero</Text>
+        </View>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[
+          styles.deviceContainer,
+          dataToSend === 'directionIndex' && styles.activeDeviceContainer,
+        ]}
+        onPress={() => setDataToSend('directionIndex')}>
+        <View>
+          <Text>Direction Index</Text>
+        </View>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -90,16 +111,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
     padding: 20,
   },
-  button: {
-   
-    backgroundColor: 'lightblue',
-    padding: 10,
+  deviceContainer: {
     margin: 5,
+    paddingLeft: 110,
+    paddingVertical: 15,
+
+    borderBottomWidth: 1,
+    backgroundColor: '#5C8EAD',
+    borderBottomColor: '#fff',
   },
-  selectedButton: {
-   
-    backgroundColor: 'blue',
-    color: 'white',
+  activeDeviceContainer: {
+    backgroundColor: '#283044',
+  },
+  text: {
+    color: '#fff',
   },
 });
 export default Sensors;

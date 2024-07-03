@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,39 +9,37 @@ import {
   Button,
   Image,
 } from 'react-native';
-import {listenForBroadcast, useWebSocket} from '../scripts/listen_broadcast';
+import { listenForBroadcast, useWebSocket } from '../scripts/listen_broadcast';
 
-const Lobby = ({navigation}) => {
-  const {connectToServer, isConnected} = useWebSocket();
+const Lobby = ({ navigation }) => {
+  const { connectToServer, isConnected } = useWebSocket();
   const [username, setUsername] = useState('');
 
   const [availableConnection, setAvailableConnection] = useState<string[]>([]);
   useEffect(() => {
     if (isConnected) {
-   
       navigation.navigate('Sensors');
     }
   }, [isConnected, navigation]);
   const handleClick = async () => {
     try {
-      const hostInfo = await listenForBroadcast();
-
-      setAvailableConnection(Array.from(hostInfo));
+      if (username === '') {
+        Alert.alert('Input field is empty', 'Username can’t be empty');
+      } else {
+        const hostInfo = await listenForBroadcast();
+        setAvailableConnection(Array.from(hostInfo));
+      }
     } catch (error) {
-      console.error('Failed to listen for broadcast:', error);
+      console.error('Error occurred:', error);
     }
   };
 
   const makeConnection = async (ip, port, username) => {
-
     try {
       await connectToServer(ip, port, username);
-
-     
     } catch (error) {
       console.log('Error ', error);
     }
-
   };
   return (
     <View style={styles.container}>
@@ -67,15 +65,14 @@ const Lobby = ({navigation}) => {
           const [host, address] = hostInfo.split('@');
           const [ip, port] = address.split(':');
           return (
-            <TouchableOpacity
+            <TouchableOpacity style={styles.deviceContainer}
               key={port}
               onPress={() => makeConnection(ip, port, username)}>
-              <View key={index}>
+              <View style={styles.deviceName} key={index}>
                 <Text>Host: {host}</Text>
                 <Text>Ip: {ip}</Text>
 
                 <Text>Port: {port}</Text>
-            
               </View>
             </TouchableOpacity>
           );
@@ -115,9 +112,11 @@ const styles = StyleSheet.create({
   deviceContainer: {
     padding: 20,
     borderBottomWidth: 1,
+
     borderBottomColor: '#444',
   },
   deviceName: {
+    margin: 15,
     color: '#fff',
     fontSize: 18,
   },
@@ -130,7 +129,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 20,
   },
-
 });
 
 export default Lobby;

@@ -1,25 +1,17 @@
-import {View, Text, SafeAreaView, ScrollView, StyleSheet} from 'react-native';
+import {View, SafeAreaView, ScrollView, StyleSheet} from 'react-native';
 import React from 'react';
-// import {WebSocketProvider} from './src/scripts/listen_broadcast';
-// import Sensors from './src/components/sensors';
-// import Lobby from './src/components/lobby';
+
 import StackNavigator from './StackNavigator';
 
 const App = () => {
   return (
-
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scrollView}>
         <View style={styles.container}>
-        {/* <WebSocketProvider> */}
-            {/* <Lobby />
-            <Sensors /> */}
-            <StackNavigator/>
-          {/* </WebSocketProvider> */}
+          <StackNavigator />
         </View>
       </ScrollView>
     </SafeAreaView>
-
   );
 };
 
