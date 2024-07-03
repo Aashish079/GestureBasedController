@@ -1,28 +1,27 @@
-import dgram from 'dgram';
-import WebSocket from 'ws';
-import os from 'os';
-import {Netmask} from 'netmask';
-import robot from 'robotjs';
-import {Buffer} from 'buffer';
+const dgram = require('dgram');
+const WebSocket = require('ws');
+const os = require('os');
+const {Netmask} = require('netmask');
+const robot = require('robotjs');
+const {Buffer} = require('buffer');
 
 const BROADCASTING_PORT = 9732;
 const BROADCASTING_DELAY = 3000;
 const WEB_SOCKET_PORT = 9648;
 
-let udpSocket = dgram.createSocket('udp4');
+let udpSocket;
 let broadcastingTimer = 0;
 let isStarted = false;
 let connectedUsers = {};
 
 function getUsername() {
-  const username = os.userInfo().username;
-  return username;
+  return os.userInfo().username;
 }
 
 function getBroadcastAddress() {
   const interfaces = os.networkInterfaces();
-  for (let iface in interfaces) {
-    for (let alias of interfaces[iface]) {
+  for (const iface in interfaces) {
+    for (const alias of interfaces[iface]) {
       if (alias.family === 'IPv4' && !alias.internal) {
         const block = new Netmask(`${alias.address}/${alias.netmask}`);
         return block.broadcast;
@@ -33,11 +32,27 @@ function getBroadcastAddress() {
 }
 
 function startBroadcasting() {
-  setInterval(() => {
-    if (!isStarted) {
-      broadcast();
-    }
-  }, BROADCASTING_DELAY);
+  try {
+    udpSocket = dgram.createSocket('udp4');
+
+    udpSocket.on('error', err => {
+      console.error('UDP socket error:', err);
+      udpSocket.close();
+    });
+
+    udpSocket.bind(() => {
+      udpSocket.setBroadcast(true);
+      console.log('UDP socket created and bound to port', BROADCASTING_PORT);
+    });
+
+    setInterval(() => {
+      if (!isStarted) {
+        broadcast();
+      }
+    }, BROADCASTING_DELAY);
+  } catch (error) {
+    console.error('Failed to initialize UDP socket:', error);
+  }
 }
 
 function broadcast() {
@@ -46,23 +61,30 @@ function broadcast() {
   const message = `${username};;${WEB_SOCKET_PORT}`;
   const buffer = Buffer.from(message);
 
-  udpSocket.setBroadcast(true);
-  const broadcastAddress = getBroadcastAddress();
-  udpSocket.send(
-    buffer,
-    0,
-    buffer.length,
-    BROADCASTING_PORT,
-    broadcastAddress,
-    err => {
-      if (err) {
-        console.error('Error broadcasting:', err);
-      }
-    },
-  );
+  try {
+    const broadcastAddress = getBroadcastAddress();
+    udpSocket.send(
+      buffer,
+      0,
+      buffer.length,
+      BROADCASTING_PORT,
+      broadcastAddress,
+      err => {
+        if (err) {
+          console.error('Error broadcasting:', err);
+        }
+      },
+    );
+  } catch (error) {
+    console.error('Failed to broadcast message:', error);
+  }
 }
 
 const wss = new WebSocket.Server({port: WEB_SOCKET_PORT});
+
+wss.on('listening', () => {
+  console.log(`WebSocket server started on port ${WEB_SOCKET_PORT}`);
+});
 
 wss.on('connection', (ws, req) => {
   const queryParams = new URLSearchParams(req.url.split('?')[1]);
