@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -11,10 +11,17 @@ import {
 } from 'react-native';
 import {listenForBroadcast, useWebSocket} from '../scripts/listen_broadcast';
 
-const Lobby = () => {
-  const {connectToServer} = useWebSocket();
+const Lobby = ({navigation}) => {
+  const {connectToServer, isConnected} = useWebSocket();
   const [username, setUsername] = useState('');
+
   const [availableConnection, setAvailableConnection] = useState<string[]>([]);
+  useEffect(() => {
+    if (isConnected) {
+   
+      navigation.navigate('Sensors');
+    }
+  }, [isConnected, navigation]);
   const handleClick = async () => {
     try {
       const hostInfo = await listenForBroadcast();
@@ -26,11 +33,11 @@ const Lobby = () => {
   };
 
   const makeConnection = async (ip, port, username) => {
+
     try {
-  
-  await connectToServer(ip, port, username);
-  
-    
+      await connectToServer(ip, port, username);
+
+     
     } catch (error) {
       console.log('Error ', error);
     }
@@ -123,6 +130,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 20,
   },
+
 });
 
 export default Lobby;

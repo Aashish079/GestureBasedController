@@ -51,36 +51,36 @@ export function listenForBroadcast(timeout = 5000) {
 const WebSocketContext = createContext(null);
 
 export const WebSocketProvider = ({children}) => {
-  const [ws, setWs] = useState(null);
 
-  const connectToServer = async (host, port, username) => {
-    const uri = `ws://${host}:${port}`;
-    console.log(`Connecting to WebSocket server at ${uri}`);
-
-    const websocket = new WebSocket(uri);
-    setWs(websocket);
-
-    websocket.onopen = () => {
-      console.log('Connected to server');
-      websocket.send(`username=${username}`);
-    };
-
-    websocket.onmessage = message => {
-      console.log(`Received message: ${message.data}`);
-    };
-
-    websocket.onclose = () => {
-      console.log('Disconnected from server');
-      setWs(null);
-    };
-
-    websocket.onerror = error => {
-      console.error(`WebSocket error: ${error}`);
-    };
+ const [socket, setSocket] = useState(null);
+ const [isConnected, setIsConnected] = useState(false);
+  const connectToServer = (ip, port, username) => {
+    return new Promise((resolve, reject) => {
+      const ws = new WebSocket(`ws://${ip}:${port}?username=${username}`);
+      ws.onopen = () => {
+        setSocket(ws);
+        setIsConnected(true);
+        ws.send(`username=${username}`);
+        resolve();
+      };
+      ws.onclose = () => {
+        setIsConnected(false);
+        setSocket(null);
+      };
+      ws.onmessage = message => {
+        console.log(`Received message: ${message.data}`);
+      };
+      ws.onerror = (error) => {
+        setIsConnected(false);
+        reject(error);
+      };
+    });
   };
 
+
+
   return (
-    <WebSocketContext.Provider value={{ws, connectToServer}}>
+    <WebSocketContext.Provider value={{ socket, isConnected, connectToServer, setIsConnected }}>
       {children}
     </WebSocketContext.Provider>
   );

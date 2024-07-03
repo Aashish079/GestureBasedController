@@ -18,7 +18,9 @@ const StackNavigator = () => {
       <WebSocketProvider>
         <Stack.Navigator initialRouteName="Lobby">
           <Stack.Screen name="Lobby" component={Lobby} />
-          <Stack.Screen name="Sensors" component={Sensors} />
+          <Stack.Screen name="Sensors" component={Sensors} 
+           options={{ headerLeft: null }} 
+          />
         </Stack.Navigator>
       </WebSocketProvider>
     </NavigationContainer>
