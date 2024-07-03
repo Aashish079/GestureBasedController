@@ -2,6 +2,8 @@ import dgram from 'dgram';
 import WebSocket from 'ws';
 import os from 'os';
 import {Netmask} from 'netmask';
+import robot from 'robotjs';
+import {Buffer} from 'buffer';
 
 const BROADCASTING_PORT = 9732;
 const BROADCASTING_DELAY = 3000;
@@ -77,6 +79,14 @@ wss.on('connection', (ws, req) => {
 
   ws.on('message', message => {
     console.log(`Received message: ${message}`);
+
+    if (message === 'left') {
+      robot.keyTap('left');
+      console.log('Left arrow key pressed');
+    } else if (message === 'right') {
+      robot.keyTap('right');
+      console.log('Right arrow key pressed');
+    }
   });
 
   ws.on('close', () => {
