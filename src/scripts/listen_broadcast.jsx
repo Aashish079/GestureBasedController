@@ -1,5 +1,5 @@
 import dgram from 'react-native-udp';
-import {createContext, useState, useContext} from 'react';
+import { createContext, useState, useContext } from 'react';
 
 const BROADCAST_PORT = 9732;
 
@@ -69,14 +69,12 @@ export const WebSocketProvider = ({children}) => {
       ws.onmessage = message => {
         console.log(`Received message: ${message.data}`);
       };
-      ws.onerror = (error) => {
+      ws.onerror = error => {
         setIsConnected(false);
         reject(error);
       };
     });
   };
-
-
 
   return (
     <WebSocketContext.Provider value={{ socket, isConnected, connectToServer, setIsConnected }}>
@@ -84,6 +82,5 @@ export const WebSocketProvider = ({children}) => {
     </WebSocketContext.Provider>
   );
 };
-
 
 export const useWebSocket = () => useContext(WebSocketContext);
