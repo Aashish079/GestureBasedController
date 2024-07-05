@@ -22,8 +22,10 @@ function getBroadcastAddress() {
   const interfaces = os.networkInterfaces();
   for (const iface in interfaces) {
     for (const alias of interfaces[iface]) {
-      if (alias.family === 'IPv4' && !alias.internal) {
+      if ( iface ==='Wi-Fi' &&alias.family === 'IPv4' && !alias.internal) {
+
         const block = new Netmask(`${alias.address}/${alias.netmask}`);
+         console.log(block.broadcast);
         return block.broadcast;
       }
     }

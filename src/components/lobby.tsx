@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -6,15 +6,15 @@ import {
   TextInput,
   Alert,
   TouchableOpacity,
-  Button,
+  Pressable,
   Image,
 } from 'react-native';
-import { listenForBroadcast, useWebSocket } from '../scripts/listen_broadcast';
+import {listenForBroadcast, useWebSocket} from '../scripts/listen_broadcast';
 
-const Lobby = ({ navigation }) => {
-  const { connectToServer, isConnected } = useWebSocket();
+const Lobby = ({navigation}) => {
+  const {connectToServer, isConnected} = useWebSocket();
   const [username, setUsername] = useState('');
-
+  const [backgroundColor, setBackgroundColor] = useState('#C9365A');
   const [availableConnection, setAvailableConnection] = useState<string[]>([]);
   useEffect(() => {
     if (isConnected) {
@@ -22,10 +22,15 @@ const Lobby = ({ navigation }) => {
     }
   }, [isConnected, navigation]);
   const handleClick = async () => {
+    setAvailableConnection([]);
     try {
       if (username === '') {
         Alert.alert('Input field is empty', 'Username can’t be empty');
       } else {
+        setBackgroundColor('#871D34');
+        setTimeout(() => {
+          setBackgroundColor('#C9365A');
+        }, 5000);
         const hostInfo = await listenForBroadcast();
         setAvailableConnection(Array.from(hostInfo));
       }
@@ -38,6 +43,7 @@ const Lobby = ({ navigation }) => {
     try {
       await connectToServer(ip, port, username);
     } catch (error) {
+      Alert.alert('Connection Failed', error.message);
       console.log('Error ', error);
     }
   };
@@ -52,20 +58,22 @@ const Lobby = ({ navigation }) => {
         placeholder="Enter username"
         placeholderTextColor="#888"
       />
-      <Button
-        title="Enter"
+
+      <Pressable
+        style={[styles.button, {backgroundColor}]}
         onPress={() => {
-          console.log(username);
           handleClick();
-        }}
-      />
+        }}>
+        <Text style={styles.text}>Search</Text>
+      </Pressable>
 
       {availableConnection.map((hostInfo, index) => {
         if (availableConnection.length > 0) {
           const [host, address] = hostInfo.split('@');
           const [ip, port] = address.split(':');
           return (
-            <TouchableOpacity style={styles.deviceContainer}
+            <TouchableOpacity
+              style={styles.deviceContainer}
               key={port}
               onPress={() => makeConnection(ip, port, username)}>
               <View style={styles.deviceName} key={index}>
@@ -109,6 +117,15 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: '#fff',
   },
+  button: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 4,
+    elevation: 3,
+  },
+
   deviceContainer: {
     padding: 20,
     borderBottomWidth: 1,

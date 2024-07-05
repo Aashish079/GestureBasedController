@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
-
   BackHandler,
   StyleSheet,
   TouchableOpacity,
@@ -12,12 +11,12 @@ import {
   subscribeGyroscope,
   subscribeRawAcclerometer,
 } from '../services/sensors';
-import { useWebSocket } from '../scripts/listen_broadcast';
-const Sensors = ({ navigation }) => {
-  const { socket, isConnected, setIsConnected } = useWebSocket();
+import {useWebSocket} from '../scripts/listen_broadcast';
+const Sensors = ({navigation}) => {
+  const {socket, isConnected, setIsConnected} = useWebSocket();
 
-  const [gyro, setGyro] = useState({ x: 0, y: 0, z: 0 });
-  const [acclero, setAcclero] = useState({ x: 0, y: 0, z: 0 });
+  const [gyro, setGyro] = useState({x: 0, y: 0, z: 0});
+  const [acclero, setAcclero] = useState({x: 0, y: 0, z: 0});
   const [dataToSend, setDataToSend] = useState('directionIndex');
   const [directionIndex, setDirectionIndex] = useState('Neutral');
 
@@ -55,7 +54,7 @@ const Sensors = ({ navigation }) => {
   useEffect(() => {
     if (!isConnected || dataToSend !== 'directionIndex') return;
     if (socket) {
-      const data = { directionIndex: directionIndex };
+      const data = {directionIndex: directionIndex};
       socket.send(JSON.stringify(data));
     }
   }, [socket, isConnected, directionIndex, dataToSend]);
@@ -63,7 +62,7 @@ const Sensors = ({ navigation }) => {
   useEffect(() => {
     if (!isConnected || dataToSend !== 'gyroAcclero') return;
     if (socket) {
-      const data = { gyroscope: gyro, accelerometer: acclero };
+      const data = {gyroscope: gyro, accelerometer: acclero};
       socket.send(JSON.stringify(data));
     }
   }, [socket, isConnected, gyro, acclero, dataToSend]);
@@ -80,27 +79,28 @@ const Sensors = ({ navigation }) => {
 
       <Text>Direction Index</Text>
       <Text>Direction : {directionIndex}</Text>
-
-      <TouchableOpacity
-        style={[
-          styles.deviceContainer,
-          dataToSend === 'gyroAcclero' && styles.activeDeviceContainer,
-        ]}
-        onPress={() => setDataToSend('gyroAcclero')}>
-        <View>
-          <Text>Gyro and Acclero</Text>
-        </View>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[
-          styles.deviceContainer,
-          dataToSend === 'directionIndex' && styles.activeDeviceContainer,
-        ]}
-        onPress={() => setDataToSend('directionIndex')}>
-        <View>
-          <Text>Direction Index</Text>
-        </View>
-      </TouchableOpacity>
+      <View style={styles.textContainer}>
+        <TouchableOpacity
+          style={[
+            styles.mode,
+            dataToSend === 'gyroAcclero' && styles.activeMode,
+          ]}
+          onPress={() => setDataToSend('gyroAcclero')}>
+          <View>
+            <Text>Gyro and Acclero</Text>
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.mode,
+            dataToSend === 'directionIndex' && styles.activeMode,
+          ]}
+          onPress={() => setDataToSend('directionIndex')}>
+          <View>
+            <Text> Direction Index </Text>
+          </View>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -111,17 +111,27 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
     padding: 20,
   },
-  deviceContainer: {
+  mode: {
+    flexDirection: 'row',
     margin: 5,
-    paddingLeft: 110,
     paddingVertical: 15,
-
+    paddingHorizontal: 40,
+    borderRadius: 5,
     borderBottomWidth: 1,
-    backgroundColor: '#5C8EAD',
+
     borderBottomColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#C9365A',
   },
-  activeDeviceContainer: {
-    backgroundColor: '#283044',
+  activeMode: {
+    backgroundColor: '#871D34',
+  },
+
+  textContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   text: {
     color: '#fff',

@@ -60,7 +60,6 @@ export const WebSocketProvider = ({children}) => {
       ws.onopen = () => {
         setSocket(ws);
         setIsConnected(true);
-        ws.send(`username=${username}`);
         resolve();
       };
       ws.onclose = () => {
