@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,12 +11,12 @@ import {
   subscribeGyroscope,
   subscribeRawAcclerometer,
 } from '../services/sensors';
-import {useWebSocket} from '../scripts/listen_broadcast';
-const Sensors = ({navigation}) => {
-  const {socket, isConnected, setIsConnected} = useWebSocket();
+import { useWebSocket } from '../scripts/listen_broadcast';
+const Sensors = ({ navigation }) => {
+  const { socket, isConnected, setIsConnected } = useWebSocket();
 
-  const [gyro, setGyro] = useState({x: 0, y: 0, z: 0});
-  const [acclero, setAcclero] = useState({x: 0, y: 0, z: 0});
+  const [gyro, setGyro] = useState({ x: 0, y: 0, z: 0 });
+  const [acclero, setAcclero] = useState({ x: 0, y: 0, z: 0 });
   const [dataToSend, setDataToSend] = useState('directionIndex');
   const [directionIndex, setDirectionIndex] = useState('Neutral');
 
@@ -54,7 +54,7 @@ const Sensors = ({navigation}) => {
   useEffect(() => {
     if (!isConnected || dataToSend !== 'directionIndex') return;
     if (socket) {
-      const data = {directionIndex: directionIndex};
+      const data = { directionIndex: directionIndex };
       socket.send(JSON.stringify(data));
     }
   }, [socket, isConnected, directionIndex, dataToSend]);
@@ -62,7 +62,7 @@ const Sensors = ({navigation}) => {
   useEffect(() => {
     if (!isConnected || dataToSend !== 'gyroAcclero') return;
     if (socket) {
-      const data = {gyroscope: gyro, accelerometer: acclero};
+      const data = { gyroscope: gyro, accelerometer: acclero };
       socket.send(JSON.stringify(data));
     }
   }, [socket, isConnected, gyro, acclero, dataToSend]);

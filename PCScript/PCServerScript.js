@@ -10,7 +10,7 @@ const BROADCASTING_DELAY = 3000;
 const WEB_SOCKET_PORT = 9648;
 
 let udpSocket;
-let broadcastingTimer = 0;
+//let broadcastingTimer = 0;
 let isStarted = false;
 let connectedUsers = {};
 
@@ -25,7 +25,7 @@ function getBroadcastAddress() {
       if ( iface ==='Wi-Fi' &&alias.family === 'IPv4' && !alias.internal) {
 
         const block = new Netmask(`${alias.address}/${alias.netmask}`);
-         console.log(block.broadcast);
+         //console.log(block.broadcast);
         return block.broadcast;
       }
     }
