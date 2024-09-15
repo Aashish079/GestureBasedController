@@ -20,12 +20,13 @@ function getUsername() {
 
 function getBroadcastAddress() {
   const interfaces = os.networkInterfaces();
+  // console.log('Available network interfaces:', interfaces);
+
   for (const iface in interfaces) {
     for (const alias of interfaces[iface]) {
-      if ( iface ==='Wi-Fi' &&alias.family === 'IPv4' && !alias.internal) {
-
+      if (alias.family === 'IPv4' && !alias.internal) {
         const block = new Netmask(`${alias.address}/${alias.netmask}`);
-         console.log(block.broadcast);
+        console.log(`Using interface ${iface} with broadcast address ${block.broadcast}`);
         return block.broadcast;
       }
     }
