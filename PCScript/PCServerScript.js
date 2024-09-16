@@ -1,16 +1,16 @@
 const dgram = require('dgram');
 const WebSocket = require('ws');
 const os = require('os');
-const {Netmask} = require('netmask');
+const { Netmask } = require('netmask');
 const robot = require('robotjs');
-const {Buffer} = require('buffer');
+const { Buffer } = require('buffer');
 
 const BROADCASTING_PORT = 9732;
 const BROADCASTING_DELAY = 3000;
 const WEB_SOCKET_PORT = 9648;
 
 let udpSocket;
-//let broadcastingTimer = 0;
+
 let isStarted = false;
 let connectedUsers = {};
 
@@ -22,10 +22,9 @@ function getBroadcastAddress() {
   const interfaces = os.networkInterfaces();
   for (const iface in interfaces) {
     for (const alias of interfaces[iface]) {
-      if ( iface ==='Wi-Fi' &&alias.family === 'IPv4' && !alias.internal) {
-
+      if (iface === 'Wi-Fi' && alias.family === 'IPv4' && !alias.internal) {
         const block = new Netmask(`${alias.address}/${alias.netmask}`);
-         //console.log(block.broadcast);
+
         return block.broadcast;
       }
     }
@@ -82,13 +81,31 @@ function broadcast() {
   }
 }
 
-const wss = new WebSocket.Server({port: WEB_SOCKET_PORT});
+
+const wss = new WebSocket.Server({ port: WEB_SOCKET_PORT });
 
 wss.on('listening', () => {
   console.log(`WebSocket server started on port ${WEB_SOCKET_PORT}`);
 });
 
 wss.on('connection', (ws, req) => {
+
+  const gyroSensitivityX = 50;
+  const gyroSensitivityY = 20;
+  const accelSensitivityX = 0.5;
+  const accelSensitivityY = 0.5;
+  const alpha = 0.8;
+
+  let filteredAccelX = 0;
+  let filteredAccelY = 0;
+
+  function lowPassFilter(oldValue, newValue) {
+    return oldValue * alpha + newValue * (1 - alpha);
+  }
+
+
+
+
   const queryParams = new URLSearchParams(req.url.split('?')[1]);
   const username = queryParams.get('username');
   const id = ws._socket.remotePort;
@@ -100,22 +117,62 @@ wss.on('connection', (ws, req) => {
   } else {
     console.log(`Client connected with id: ${id}`);
   }
+  // here
+
+
+
 
   ws.on('message', message => {
-    console.log(`Received message: ${message}`);
-
-    //Obtained message is string so converting into JSON
     const messageObj = JSON.parse(message);
-    console.log(messageObj.directionIndex);
 
-    if (messageObj.directionIndex === 'Left') {
-      robot.keyTap('left');
-      console.log('Left arrow key pressed');
-    } else if (messageObj.directionIndex === 'Right') {
-      robot.keyTap('right');
-      console.log('Right arrow key pressed');
-    } else if (messageObj.directionIndex === 'Neutral') {
-      console.log('Neutral position, no key pressed');
+    if (messageObj.directionIndex) {
+      console.log(messageObj.directionIndex);
+      if (messageObj.directionIndex === 'Left') {
+        robot.keyTap('left');
+        console.log('Left arrow key pressed');
+      } else if (messageObj.directionIndex === 'Right') {
+        robot.keyTap('right');
+        console.log('Right arrow key pressed');
+      } else if (messageObj.directionIndex === 'Neutral') {
+        console.log('Neutral position, no key pressed');
+      }
+    } else if (messageObj.gyroscope && messageObj.accelerometer) {
+      // Handle sensor data
+      const gyro = messageObj.gyroscope;
+      const acclero = messageObj.accelerometer;
+      const gyroDeltaX = gyro.y * gyroSensitivityX;
+      const gyroDeltaY = gyro.x * gyroSensitivityY;
+      let currentX = robot.getMousePos().x;
+      let currentY = robot.getMousePos().y;
+      // Process accelerometer data
+      filteredAccelX = lowPassFilter(filteredAccelX, acclero.x);
+      filteredAccelY = lowPassFilter(filteredAccelY, acclero.y);
+      const accelDeltaX = filteredAccelX * accelSensitivityX;
+      const accelDeltaY = filteredAccelY * accelSensitivityY;
+
+      // Combine gyroscope and accelerometer data
+      const deltaX = gyroDeltaX + accelDeltaX;
+      const deltaY = gyroDeltaY + accelDeltaY;
+
+      // Update current position
+      currentX += deltaX;
+      currentY += deltaY
+
+      robot.moveMouse(Math.round(currentX), Math.round(currentY));
+
+
+
+
+
+      // let mouseX = robot.getMousePos().x + Math.round(gyro.x * sensitivity);
+      // let mouseY = robot.getMousePos().y + Math.round(gyro.y * sensitivity);
+      // robot.moveMouse(mouseX, mouseY);
+
+      // if (acclero.z < -10) {
+      //   robot.mouseClick('left');
+      // } else if (acclero.z > 10) {
+      //   robot.mouseClick('right');
+      // }
     }
   });
 
