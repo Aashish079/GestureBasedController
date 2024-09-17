@@ -23,7 +23,10 @@ class BroadcastService {
       this.udpSocket.on('error', this.handleSocketError.bind(this));
       this.udpSocket.bind(() => {
         this.udpSocket.setBroadcast(true);
-        console.log('UDP socket created and bound to port', this.broadcastingPort);
+        console.log(
+          'UDP socket created and bound to port',
+          this.broadcastingPort,
+        );
       });
     } catch (error) {
       console.error('Failed to initialize UDP socket:', error);
@@ -50,7 +53,7 @@ class BroadcastService {
         buffer.length,
         this.broadcastingPort,
         broadcastAddress,
-        this.handleBroadcastError.bind(this)
+        this.handleBroadcastError.bind(this),
       );
     } catch (error) {
       console.error('Failed to broadcast message:', error);

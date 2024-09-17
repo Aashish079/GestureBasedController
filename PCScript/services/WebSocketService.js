@@ -6,6 +6,7 @@ class WebSocketService {
     this.port = port;
     this.wss = null;
     this.connectedUsers = {};
+    this.currentMode = null;
   }
 
   start() {
@@ -41,6 +42,7 @@ class WebSocketService {
 
     if (messageObj.directionIndex) {
       this.handleDirectionChange(messageObj.directionIndex);
+      mouseController.resetGyroAccelMode();
     } else if (messageObj.gyroscope && messageObj.accelerometer) {
       mouseController.updatePosition(
         messageObj.gyroscope,
@@ -78,7 +80,7 @@ class WebSocketService {
 class MouseController {
   constructor() {
     this.gyroSensitivityX = 50;
-    this.gyroSensitivityY = -20;
+    this.gyroSensitivityY = -50;
     this.accelSensitivityX = 0.0;
     this.accelSensitivityY = -0.1;
     this.alpha = 0.8;
@@ -89,9 +91,14 @@ class MouseController {
     this.xWindow = new Array(this.windowSize).fill(0);
     this.yWindow = new Array(this.windowSize).fill(0);
     this.windowIndex = 0;
+    this.isFirstGyroAccelData = true;
   }
 
   updatePosition(gyro, accel, button) {
+    if (this.isFirstGyroAccelData) {
+      this.centerMouse();
+      this.isFirstGyroAccelData = false;
+    }
     const gyroDeltaX = gyro.y * this.gyroSensitivityX;
     const gyroDeltaY = gyro.x * this.gyroSensitivityY;
     let currentX = robot.getMousePos().x;
@@ -113,14 +120,23 @@ class MouseController {
 
     currentX += smoothDeltaX;
     currentY += smoothDeltaY;
-    console.log(button);
-    
+
     if (button === 'L') {
       robot.mouseClick('left');
     } else if (button === 'R') {
       robot.mouseClick('right');
     }
     robot.moveMouse(Math.round(currentX), Math.round(currentY));
+  }
+  centerMouse() {
+    const screenSize = robot.getScreenSize();
+    const centerX = Math.floor(screenSize.width / 2);
+    const centerY = Math.floor(screenSize.height / 2);
+    robot.moveMouse(centerX, centerY);
+  }
+
+  resetGyroAccelMode() {
+    this.isFirstGyroAccelData = true;
   }
 
   applyDeadZone(value, threshold) {
