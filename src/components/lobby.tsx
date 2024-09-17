@@ -10,12 +10,19 @@ import {
   Image,
 } from 'react-native';
 import {listenForBroadcast, useWebSocket} from '../scripts/listen_broadcast';
-
+//import NetInfo from '@react-native-community/netinfo'; 
 const Lobby = ({navigation}) => {
   const {connectToServer, isConnected} = useWebSocket();
   const [username, setUsername] = useState('');
   const [backgroundColor, setBackgroundColor] = useState('#C9365A');
   const [availableConnection, setAvailableConnection] = useState<string[]>([]);
+  // useEffect(() => {
+  //   const unsubscribe = NetInfo.addEventListener(state => {
+  //     setIsWifiConnected(state.type === 'wifi' && state.isConnected);
+  //   });
+
+  //   return () => unsubscribe();
+  // }, []);
   useEffect(() => {
     if (isConnected) {
       navigation.navigate('Sensors');

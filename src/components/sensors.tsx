@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -11,15 +11,16 @@ import {
   subscribeGyroscope,
   subscribeRawAcclerometer,
 } from '../services/sensors';
-import { useWebSocket } from '../scripts/listen_broadcast';
-const Sensors = ({ navigation }) => {
-  const { socket, isConnected, setIsConnected } = useWebSocket();
+import {useWebSocket} from '../scripts/listen_broadcast';
+const Sensors = ({navigation}) => {
+  const {socket, isConnected, setIsConnected} = useWebSocket();
 
-  const [gyro, setGyro] = useState({ x: 0, y: 0, z: 0 });
-  const [acclero, setAcclero] = useState({ x: 0, y: 0, z: 0 });
+  const [gyro, setGyro] = useState({x: 0, y: 0, z: 0});
+  const [acclero, setAcclero] = useState({x: 0, y: 0, z: 0});
   const [dataToSend, setDataToSend] = useState('directionIndex');
   const [directionIndex, setDirectionIndex] = useState('Neutral');
-
+  const [showAdditionalButtons, setShowAdditionalButtons] = useState(false);
+  const [mouseButton, setMouseButton] = useState('0');
   useEffect(() => {
     const backAction = () => {
       setIsConnected(false);
@@ -43,7 +44,7 @@ const Sensors = ({ navigation }) => {
 
     const subscriptionRawAcclero = subscribeRawAcclerometer(setAcclero);
 
-    const subscriptionAccelero =  subscribeAccelerometer(setDirectionIndex);
+    const subscriptionAccelero = subscribeAccelerometer(setDirectionIndex);
     return () => {
       subscriptionGyro.unsubscribe();
       subscriptionRawAcclero.unsubscribe();
@@ -53,7 +54,7 @@ const Sensors = ({ navigation }) => {
   useEffect(() => {
     if (!isConnected || dataToSend !== 'directionIndex') return;
     if (socket) {
-      const data = { directionIndex: directionIndex };
+      const data = {directionIndex: directionIndex};
       socket.send(JSON.stringify(data));
     }
   }, [socket, isConnected, directionIndex, dataToSend]);
@@ -61,10 +62,15 @@ const Sensors = ({ navigation }) => {
   useEffect(() => {
     if (!isConnected || dataToSend !== 'gyroAcclero') return;
     if (socket) {
-      const data = { gyroscope: gyro, accelerometer: acclero };
+      const data = {
+        gyroscope: gyro,
+        accelerometer: acclero,
+        button: mouseButton,
+      };
       socket.send(JSON.stringify(data));
     }
-  }, [socket, isConnected, gyro, acclero, dataToSend]);
+    setMouseButton('0');
+  }, [socket, isConnected, gyro, acclero, dataToSend, mouseButton]);
   return (
     <View style={styles.container}>
       <Text>Gyroscope Sensor</Text>
@@ -84,9 +90,12 @@ const Sensors = ({ navigation }) => {
             styles.mode,
             dataToSend === 'gyroAcclero' && styles.activeMode,
           ]}
-          onPress={() => setDataToSend('gyroAcclero')}>
+          onPress={() => {
+            setDataToSend('gyroAcclero');
+            setShowAdditionalButtons(true);
+          }}>
           <View>
-            <Text>Gyro and Acclero</Text>
+            <Text>Motion Pointer</Text>
           </View>
         </TouchableOpacity>
         <TouchableOpacity
@@ -94,11 +103,28 @@ const Sensors = ({ navigation }) => {
             styles.mode,
             dataToSend === 'directionIndex' && styles.activeMode,
           ]}
-          onPress={() => setDataToSend('directionIndex')}>
+          onPress={() => {
+            setDataToSend('directionIndex');
+            setShowAdditionalButtons(false);
+          }}>
           <View>
-            <Text> Direction Index </Text>
+            <Text>Gesture Direction</Text>
           </View>
         </TouchableOpacity>
+        {showAdditionalButtons && (
+          <View style={styles.additionalButtonsContainer}>
+            <TouchableOpacity
+              style={styles.additionalButton}
+              onPress={() => setMouseButton('L')}>
+              <Text style={styles.additionalButtonText}>Left</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.additionalButton}
+              onPress={() => setMouseButton('R')}>
+              <Text style={styles.additionalButtonText}>Right</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     </View>
   );
@@ -134,6 +160,22 @@ const styles = StyleSheet.create({
   },
   text: {
     color: '#fff',
+  },
+  additionalButtonsContainer: {
+    flexDirection: 'row',
+    marginTop: 10,
+    marginHorizontal: 15,
+  },
+  additionalButton: {
+    marginHorizontal: 10,
+    padding: 10,
+    backgroundColor: 'black',
+    borderColor: 'white',
+    borderWidth: 2,
+    borderRadius: 5,
+  },
+  additionalButtonText: {
+    color: 'white',
   },
 });
 export default Sensors;

@@ -7,7 +7,7 @@ import {
 import { map, pairwise, filter } from 'rxjs/operators';
 
 const threshold = 20;
-const updateInterval = 50;
+const updateInterval = 80;
 setUpdateIntervalForType(SensorTypes.accelerometer, updateInterval);
 setUpdateIntervalForType(SensorTypes.gyroscope, updateInterval);
 

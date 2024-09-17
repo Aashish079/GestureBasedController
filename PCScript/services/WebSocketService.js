@@ -45,6 +45,7 @@ class WebSocketService {
       mouseController.updatePosition(
         messageObj.gyroscope,
         messageObj.accelerometer,
+        messageObj.button,
       );
     }
   }
@@ -90,7 +91,7 @@ class MouseController {
     this.windowIndex = 0;
   }
 
-  updatePosition(gyro, accel) {
+  updatePosition(gyro, accel, button) {
     const gyroDeltaX = gyro.y * this.gyroSensitivityX;
     const gyroDeltaY = gyro.x * this.gyroSensitivityY;
     let currentX = robot.getMousePos().x;
@@ -112,7 +113,13 @@ class MouseController {
 
     currentX += smoothDeltaX;
     currentY += smoothDeltaY;
-
+    console.log(button);
+    
+    if (button === 'L') {
+      robot.mouseClick('left');
+    } else if (button === 'R') {
+      robot.mouseClick('right');
+    }
     robot.moveMouse(Math.round(currentX), Math.round(currentY));
   }
 
