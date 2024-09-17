@@ -43,8 +43,7 @@ const Sensors = ({ navigation }) => {
 
     const subscriptionRawAcclero = subscribeRawAcclerometer(setAcclero);
 
-    const subscriptionAccelero = subscribeAccelerometer(setDirectionIndex);
-
+    const subscriptionAccelero =  subscribeAccelerometer(setDirectionIndex);
     return () => {
       subscriptionGyro.unsubscribe();
       subscriptionRawAcclero.unsubscribe();

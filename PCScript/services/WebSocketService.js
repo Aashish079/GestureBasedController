@@ -32,7 +32,7 @@ class WebSocketService {
       console.log(`Client connected with id: ${id}`);
     }
 
-    ws.on('message', (message) => this.handleMessage(message, mouseController));
+    ws.on('message', message => this.handleMessage(message, mouseController));
     ws.on('close', () => this.handleClose(id));
   }
 
@@ -42,7 +42,10 @@ class WebSocketService {
     if (messageObj.directionIndex) {
       this.handleDirectionChange(messageObj.directionIndex);
     } else if (messageObj.gyroscope && messageObj.accelerometer) {
-      mouseController.updatePosition(messageObj.gyroscope, messageObj.accelerometer);
+      mouseController.updatePosition(
+        messageObj.gyroscope,
+        messageObj.accelerometer,
+      );
     }
   }
 
@@ -50,18 +53,20 @@ class WebSocketService {
     console.log(direction);
     if (direction === 'Left') {
       robot.keyTap('left');
-     // console.log('Left arrow key pressed');
+      // console.log('Left arrow key pressed');
     } else if (direction === 'Right') {
       robot.keyTap('right');
       //console.log('Right arrow key pressed');
     } else if (direction === 'Neutral') {
-    //  console.log('Neutral position, no key pressed');
+      //  console.log('Neutral position, no key pressed');
     }
   }
 
   handleClose(id) {
     if (this.connectedUsers[id]) {
-      console.log(`Client disconnected with username: ${this.connectedUsers[id]}, id: ${id}`);
+      console.log(
+        `Client disconnected with username: ${this.connectedUsers[id]}, id: ${id}`,
+      );
       delete this.connectedUsers[id];
     } else {
       console.log(`Client disconnected with id: ${id}`);
@@ -93,8 +98,12 @@ class MouseController {
 
     this.filteredAccelX = this.lowPassFilter(this.filteredAccelX, accel.x);
     this.filteredAccelY = this.lowPassFilter(this.filteredAccelY, accel.y);
-    const accelDeltaX = this.applyDeadZone(this.filteredAccelX, this.deadZone) * this.accelSensitivityX;
-    const accelDeltaY = this.applyDeadZone(this.filteredAccelY, this.deadZone) * this.accelSensitivityY;
+    const accelDeltaX =
+      this.applyDeadZone(this.filteredAccelX, this.deadZone) *
+      this.accelSensitivityX;
+    const accelDeltaY =
+      this.applyDeadZone(this.filteredAccelY, this.deadZone) *
+      this.accelSensitivityY;
 
     const deltaX = gyroDeltaX + accelDeltaX;
     const deltaY = gyroDeltaY + accelDeltaY;
